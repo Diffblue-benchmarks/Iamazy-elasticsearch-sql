@@ -1,0 +1,338 @@
+buildCmd: mvn -e -X -Dmaven.test.skip=true compile
+testCmd: true
+lineLength: 4096
+skipVerification: true
+cbmcArguments:
+  # Do not generate coverage comments on generated tests.
+  java-generate-no-comments: true
+phases:
+  -
+  #Phase 0 PRETTY AND SIMPLE - Simple models, quick cover, pretty Tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # Instrument the file as opposed to the function only
+      cover-only: file
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 1 PRETTY AND COMPLEX - Standard models, longer run time, pretty tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 2
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+  -
+  #Phase 2 Simple and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # If the logs contain output of the following then proceed to phase X
+    nextPhase:
+      # If the function is not analysable then do not pass onto the next phase
+      not_analyzed: null
+  -
+  #Phase 3 Complex and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 3000
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 4 EXCEPTIONS
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+  -
+    #PHASE 5 Big numbers and less contraints on inputs 
+    timeout: 300
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 100
+      # Bound the length of input strings.
+      max-nondet-string-length: 100
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 6
+units:
+# Target TGF: 60.9
+#  >methods=4
+#  >complexity=112
+#  >construction=3.15
+#  >dependency=1.33333333333
+ - target:
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/parser/sql/sort/ParseSortBuilderHelper.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/parser/sql/sort/ParseSortBuilderHelper.java
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/model/ElasticSqlQueryField.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/model/ElasticSqlQueryField.java
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/parser/sql/sort/ConditionSortBuilder.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/parser/sql/sort/ConditionSortBuilder.java
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/exception/ElasticSql2DslException.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/exception/ElasticSql2DslException.java
+# Target TGF: 113.0
+#  >methods=10
+#  >complexity=151
+#  >construction=3.39285714286
+#  >dependency=4.5
+ - target:
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/parser/query/method/score/ScoreQueryParser.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/parser/query/method/score/ScoreQueryParser.java
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/parser/query/method/score/BoostingQueryParser.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/parser/query/method/score/BoostingQueryParser.java
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/parser/query/method/score/FunctionScoreQueryParser.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/parser/query/method/score/FunctionScoreQueryParser.java
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/exception/ElasticSql2DslException.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/exception/ElasticSql2DslException.java
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/parser/query/method/MethodQueryParser.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/parser/query/method/MethodQueryParser.java
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/parser/query/method/MethodInvocation.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/parser/query/method/MethodInvocation.java
+# Target TGF: 965.25
+#  >methods=11
+#  >complexity=161
+#  >construction=38.25
+#  >dependency=3.5
+ - target:
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/helper/ElasticSqlDateParseHelper.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/helper/ElasticSqlDateParseHelper.java
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/helper/ElasticSqlMethodInvokeHelper.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/helper/ElasticSqlMethodInvokeHelper.java
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/exception/ElasticSql2DslException.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/exception/ElasticSql2DslException.java
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/helper/ElasticSqlDateParseHelper$SqlDateRegex.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/helper/ElasticSqlDateParseHelper.java
+# Target TGF: 81.5
+#  >methods=14
+#  >complexity=115
+#  >construction=7.25
+#  >dependency=6.0
+ - target:
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/parser/query/method/MethodInvocation.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/parser/query/method/MethodInvocation.java
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/helper/ElasticSqlArgConverter.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/helper/ElasticSqlArgConverter.java
+# Target TGF: 478.125
+#  >methods=9
+#  >complexity=291
+#  >construction=29.25
+#  >dependency=3.33333333333
+ - target:
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/helper/ElasticSqlMethodInvokeHelper.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/helper/ElasticSqlMethodInvokeHelper.java
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/exception/ElasticSql2DslException.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/exception/ElasticSql2DslException.java
+# Target TGF: 274.95
+#  >methods=4
+#  >complexity=136
+#  >construction=11.25
+#  >dependency=1.2
+ - target:
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/helper/ElasticSqlArgConverter.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/helper/ElasticSqlArgConverter.java
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/helper/ElasticSqlDateParseHelper.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/helper/ElasticSqlDateParseHelper.java
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/helper/ElasticSqlMethodInvokeHelper.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/helper/ElasticSqlMethodInvokeHelper.java
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/exception/ElasticSql2DslException.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/exception/ElasticSql2DslException.java
+# Target TGF: 1597.5
+#  >methods=4
+#  >complexity=243
+#  >construction=27.0
+#  >dependency=2.5
+ - target:
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/utils/FlatMapUtils.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/utils/FlatMapUtils.java
+# Target TGF: 92.25
+#  >methods=2
+#  >complexity=41
+#  >construction=9.0
+#  >dependency=0.25
+ - target:
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/parser/query/method/mapping/MappingQueryParser.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/parser/query/method/mapping/MappingQueryParser.java
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/exception/ElasticSql2DslException.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/exception/ElasticSql2DslException.java
+# Target TGF: 90.0
+#  >methods=6
+#  >complexity=40
+#  >construction=11.25
+#  >dependency=5.0
+ - target:
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/model/ElasticSqlQueryFields.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/model/ElasticSqlQueryFields.java
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/model/ElasticSqlQueryField.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/model/ElasticSqlQueryField.java
+# Target TGF: 616.906111111
+#  >methods=47
+#  >complexity=1013
+#  >construction=3.85
+#  >dependency=3.81111111111
+ - target:
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/model/ElasticSqlParseResult.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/model/ElasticSqlParseResult.java
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/elastic/HighlightBuilders.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/elastic/HighlightBuilders.java
+   - dir: target/classes
+     file: io/github/iamazy/elasticsearch/dsl/sql/exception/ElasticSql2DslException.class
+     sourceDir: src/main/java
+     sourceFile: io/github/iamazy/elasticsearch/dsl/sql/exception/ElasticSql2DslException.java
